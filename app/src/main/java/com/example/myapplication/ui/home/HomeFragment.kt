@@ -25,7 +25,9 @@ import androidx.camera.core.ImageProxy
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LifecycleOwner
 import com.example.myapplication.databinding.FragmentHomeBinding
+import com.google.common.util.concurrent.ListenableFuture
 import java.nio.ByteBuffer
 
 
@@ -44,6 +46,8 @@ class HomeFragment : Fragment() {
     private var recording: Recording? = null
 
     private lateinit var cameraExecutor: ExecutorService
+
+    private lateinit var cameraProviderFuture : ListenableFuture<ProcessCameraProvider>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,7 +73,6 @@ class HomeFragment : Fragment() {
 
         return super.onCreateView(inflater, container, savedInstanceState)
     }
-
     private fun takePhoto() {
         // Get a stable reference of the modifiable image capture use case
         /*val imageCapture = imageCapture ?: return
@@ -114,34 +117,22 @@ class HomeFragment : Fragment() {
     }
 
     private fun startCamera() {
-        var cameraController = LifecycleCameraController(requireContext())
-        val previewView: PreviewView = viewBinding.viewFinder
+        //var cameraController = LifecycleCameraController(requireContext())
 
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
+        cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
 
         cameraProviderFuture.addListener({
             // Used to bind the lifecycle of cameras to the lifecycle owner
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
 
             // Preview
-            val preview = Preview.Builder()
-                .build()
-                .also {
-                    it.setSurfaceProvider(viewBinding.viewFinder.surfaceProvider)
-                }
+            val preview = Preview.Builder().build()
 
-            imageCapture = ImageCapture.Builder().build()
-
-            val imageAnalyzer = ImageAnalysis.Builder()
-                .build()
-                .also {
-                    it.setAnalyzer(cameraExecutor, LuminosityAnalyzer { luma ->
-                        Log.d(TAG, "Average luminosity: $luma")
-                    })
-                }
 
             // Select back camera as a default
-            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+            val cameraSelector = CameraSelector.Builder()
+                .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+                .build()
 
             try {
                 // Unbind use cases before rebinding
@@ -149,7 +140,9 @@ class HomeFragment : Fragment() {
 
                 // Bind use cases to camera
                 cameraProvider.bindToLifecycle(
-                    this, cameraSelector, preview, imageCapture, imageAnalyzer)
+                    this, cameraSelector, preview)
+
+                preview.setSurfaceProvider(viewBinding.viewFinder.surfaceProvider)
 
             } catch(exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
@@ -194,7 +187,7 @@ class HomeFragment : Fragment() {
             // Handle Permission granted/rejected
             var permissionGranted = true
             permissions.entries.forEach {
-                if (it.key in REQUIRED_PERMISSIONS && it.value == false)
+                if (it.key in REQUIRED_PERMISSIONS && !it.value)
                     permissionGranted = false
             }
             if (!permissionGranted) {
