@@ -1,6 +1,7 @@
 package com.example.myapplication.ui.home
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -17,12 +18,23 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.OptIn
+import androidx.camera.core.Camera
+import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.example.myapplication.MainActivity
 import com.example.myapplication.databinding.FragmentHomeBinding
 import com.google.common.util.concurrent.ListenableFuture
+import com.google.mlkit.vision.barcode.BarcodeScanner
+import com.google.mlkit.vision.barcode.BarcodeScannerOptions
+import com.google.mlkit.vision.barcode.BarcodeScanning
+import com.google.mlkit.vision.barcode.ZoomSuggestionOptions
+import com.google.mlkit.vision.barcode.ZoomSuggestionOptions.ZoomCallback
+import com.google.mlkit.vision.barcode.common.Barcode
+import com.google.mlkit.vision.common.InputImage
 import kotlinx.coroutines.launch
 import java.nio.ByteBuffer
 
@@ -37,9 +49,9 @@ class HomeFragment : Fragment() {
     private val binding get() = viewBinding
 
     private var imageCapture: ImageCapture? = null
+    private var camera: Camera? = null
 
     private lateinit var cameraExecutor: ExecutorService
-
     private lateinit var cameraProviderFuture : ListenableFuture<ProcessCameraProvider>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,9 +90,6 @@ class HomeFragment : Fragment() {
             }
         }
     }
-    private fun takePhoto() {
-
-    }
 
     private fun startCamera() {
         cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
@@ -92,6 +101,11 @@ class HomeFragment : Fragment() {
             // Preview
             val preview = Preview.Builder().build()
 
+            val imageAnalyzer = ImageAnalysis.Builder()
+                .build()
+                .also {
+                    it.setAnalyzer(cameraExecutor, BarcodeImageAnalyzer(ZoomCallback(camera), requireContext()))
+                }
 
             // Select back camera as a default
             val cameraSelector = CameraSelector.Builder()
@@ -103,8 +117,8 @@ class HomeFragment : Fragment() {
                 cameraProvider.unbindAll()
 
                 // Bind use cases to camera
-                cameraProvider.bindToLifecycle(
-                    this, cameraSelector, preview)
+                camera = cameraProvider.bindToLifecycle(
+                    this, cameraSelector, preview, imageAnalyzer)
 
                 preview.setSurfaceProvider(viewBinding.viewFinder.surfaceProvider)
 
@@ -113,7 +127,10 @@ class HomeFragment : Fragment() {
             }
 
         }, ContextCompat.getMainExecutor(requireContext()))
+    }
 
+    private fun takePhoto() {
+        TODO("Not yet implemented")
     }
 
     private fun requestPermissions() {
@@ -164,26 +181,42 @@ class HomeFragment : Fragment() {
                 }
             }
         }
+    private class BarcodeImageAnalyzer(zoomCallback: ZoomCallback?, private val context: Context) : ImageAnalysis.Analyzer {
+        private var barcodeScanner: BarcodeScanner
 
-    private class LuminosityAnalyzer(private val listener: LumaListener) : ImageAnalysis.Analyzer {
-
-        private fun ByteBuffer.toByteArray(): ByteArray {
-            rewind()    // Rewind the buffer to zero
-            val data = ByteArray(remaining())
-            get(data)   // Copy the buffer into a byte array
-            return data // Return the byte array
+        init {
+            barcodeScanner =
+                if (zoomCallback != null){
+                    val options = BarcodeScannerOptions.Builder()
+                        .setBarcodeFormats(Barcode.FORMAT_UPC_A, Barcode.FORMAT_UPC_E)
+                        .setZoomSuggestionOptions(ZoomSuggestionOptions.Builder(zoomCallback).build())
+                        .build()
+                    BarcodeScanning.getClient(options)
+                }
+                else {
+                    BarcodeScanning.getClient()
+                }
         }
+        @OptIn(ExperimentalGetImage::class) override fun analyze(imageProxy: ImageProxy) {
+            val mediaImage = imageProxy.image
+            if (mediaImage != null) {
+                val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
+                var barcodes = barcodeScanner.process(image)
+                    .addOnSuccessListener {
+                        for (barcode in it){
+                            Toast.makeText(context, "Barcode Number: ${barcode.displayValue}", Toast.LENGTH_SHORT).show()
+                            Log.d(TAG, "Barcode Number: ${barcode.displayValue}")
+                        }
+                    }
+            }
+            imageProxy.close()
+        }
+    }
 
-        override fun analyze(image: ImageProxy) {
-
-            val buffer = image.planes[0].buffer
-            val data = buffer.toByteArray()
-            val pixels = data.map { it.toInt() and 0xFF }
-            val luma = pixels.average()
-
-            listener(luma)
-
-            image.close()
+    private class ZoomCallback(val camera: Camera?) : ZoomSuggestionOptions.ZoomCallback{
+        override fun setZoom(zoomRatio: Float): Boolean {
+            camera?.cameraControl?.setZoomRatio(zoomRatio)
+            return true
         }
     }
 }
