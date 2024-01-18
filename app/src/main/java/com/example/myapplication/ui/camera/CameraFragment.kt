@@ -1,7 +1,6 @@
-package com.example.myapplication.ui.home
+package com.example.myapplication.ui.camera
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -18,31 +17,22 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.OptIn
 import androidx.camera.core.Camera
-import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.ImageProxy
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.example.myapplication.MainActivity
-import com.example.myapplication.databinding.FragmentHomeBinding
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.navigateUp
+import com.example.myapplication.databinding.FragmentCameraBinding
 import com.google.common.util.concurrent.ListenableFuture
-import com.google.mlkit.vision.barcode.BarcodeScanner
-import com.google.mlkit.vision.barcode.BarcodeScannerOptions
-import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.ZoomSuggestionOptions
-import com.google.mlkit.vision.barcode.ZoomSuggestionOptions.ZoomCallback
-import com.google.mlkit.vision.barcode.common.Barcode
-import com.google.mlkit.vision.common.InputImage
 import kotlinx.coroutines.launch
-import java.nio.ByteBuffer
+import com.example.myapplication.BarcodeImageAnalyzer
+import com.example.myapplication.R
 
-
-typealias LumaListener = (luma: Double) -> Unit
-
-class HomeFragment : Fragment() {
-    private lateinit var viewBinding: FragmentHomeBinding
+class CameraFragment : Fragment() {
+    private lateinit var viewBinding: FragmentCameraBinding
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -71,10 +61,13 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewBinding = FragmentHomeBinding.inflate(layoutInflater)
+        viewBinding = FragmentCameraBinding.inflate(layoutInflater)
 
         // Set up the listeners for take photo and video capture buttons
-        viewBinding.imageCaptureButton.setOnClickListener{ takePhoto() }
+        viewBinding.imageCaptureButton.setOnClickListener{
+            Log.d(TAG, "takePhoto: Taking Photo")
+            it.findNavController().navigate(R.id.action_navigation_camera_to_navigation_addremove)
+        }
 
         return viewBinding.root
     }
@@ -104,7 +97,8 @@ class HomeFragment : Fragment() {
             val imageAnalyzer = ImageAnalysis.Builder()
                 .build()
                 .also {
-                    it.setAnalyzer(cameraExecutor, BarcodeImageAnalyzer(ZoomCallback(camera), requireContext()))
+                    it.setAnalyzer(cameraExecutor, BarcodeImageAnalyzer(ZoomCallback(camera),
+                        requireContext(), requireView().findNavController()))
                 }
 
             // Select back camera as a default
@@ -130,7 +124,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun takePhoto() {
-        TODO("Not yet implemented")
+
     }
 
     private fun requestPermissions() {
@@ -148,7 +142,7 @@ class HomeFragment : Fragment() {
     }
 
     companion object {
-        private const val TAG = "CameraXApp"
+        private const val TAG = "CameraFragment"
         private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
         private val REQUIRED_PERMISSIONS =
             mutableListOf (
@@ -181,39 +175,8 @@ class HomeFragment : Fragment() {
                 }
             }
         }
-    private class BarcodeImageAnalyzer(zoomCallback: ZoomCallback?, private val context: Context) : ImageAnalysis.Analyzer {
-        private var barcodeScanner: BarcodeScanner
 
-        init {
-            barcodeScanner =
-                if (zoomCallback != null){
-                    val options = BarcodeScannerOptions.Builder()
-                        .setBarcodeFormats(Barcode.FORMAT_UPC_A, Barcode.FORMAT_UPC_E)
-                        .setZoomSuggestionOptions(ZoomSuggestionOptions.Builder(zoomCallback).build())
-                        .build()
-                    BarcodeScanning.getClient(options)
-                }
-                else {
-                    BarcodeScanning.getClient()
-                }
-        }
-        @OptIn(ExperimentalGetImage::class) override fun analyze(imageProxy: ImageProxy) {
-            val mediaImage = imageProxy.image
-            if (mediaImage != null) {
-                val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
-                var barcodes = barcodeScanner.process(image)
-                    .addOnSuccessListener {
-                        for (barcode in it){
-                            Toast.makeText(context, "Barcode Number: ${barcode.displayValue}", Toast.LENGTH_SHORT).show()
-                            Log.d(TAG, "Barcode Number: ${barcode.displayValue}")
-                        }
-                    }
-            }
-            imageProxy.close()
-        }
-    }
-
-    private class ZoomCallback(val camera: Camera?) : ZoomSuggestionOptions.ZoomCallback{
+    class ZoomCallback(val camera: Camera?) : ZoomSuggestionOptions.ZoomCallback{
         override fun setZoom(zoomRatio: Float): Boolean {
             camera?.cameraControl?.setZoomRatio(zoomRatio)
             return true
