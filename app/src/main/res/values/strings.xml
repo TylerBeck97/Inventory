@@ -4,4 +4,8 @@
     <string name="title_camera">Camera</string>
     <string name="title_inventory">Inventory</string>
     <string name="title_addremove">Add/Remove</string>
+    <string name="description">Description</string>
+    <string name="barcode_number">Barcode Number</string>
+    <string name="add">Add</string>
+    <string name="remove">Remove</string>
 </resources>
