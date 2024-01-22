@@ -22,8 +22,6 @@ import androidx.camera.core.ImageAnalysis
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
-import androidx.navigation.ui.navigateUp
 import com.example.myapplication.databinding.FragmentCameraBinding
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.mlkit.vision.barcode.ZoomSuggestionOptions
@@ -62,12 +60,6 @@ class CameraFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         viewBinding = FragmentCameraBinding.inflate(layoutInflater)
-
-        // Set up the listeners for take photo and video capture buttons
-        viewBinding.imageCaptureButton.setOnClickListener{
-            Log.d(TAG, "takePhoto: Taking Photo")
-            it.findNavController().navigate(R.id.action_navigation_camera_to_navigation_addremove)
-        }
 
         return viewBinding.root
     }
@@ -143,11 +135,9 @@ class CameraFragment : Fragment() {
 
     companion object {
         private const val TAG = "CameraFragment"
-        private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
         private val REQUIRED_PERMISSIONS =
             mutableListOf (
-                Manifest.permission.CAMERA,
-                Manifest.permission.RECORD_AUDIO
+                Manifest.permission.CAMERA
             ).apply {
                 if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
                     add(Manifest.permission.WRITE_EXTERNAL_STORAGE)

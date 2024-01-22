@@ -6,8 +6,14 @@ import androidx.lifecycle.ViewModel
 
 class AddRemoveViewModel : ViewModel() {
 
-    private val _text = MutableLiveData<String>().apply {
-        value = "This is notifications Fragment"
+    private val _barcodeText = MutableLiveData<String>().apply {
+        value = ""
     }
-    val text: LiveData<String> = _text
+
+    private val _descriptionText = MutableLiveData<String>().apply {
+        value = ""
+    }
+
+    val barcodeText: LiveData<String> = _barcodeText
+    val descriptionText = _descriptionText
 }

@@ -7,11 +7,9 @@ import androidx.annotation.OptIn
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.navigation.NavController
-import androidx.navigation.fragment.NavHostFragment
 import com.example.myapplication.ui.camera.CameraFragment
+import com.example.myapplication.ui.camera.CameraFragmentDirections
 import com.google.mlkit.vision.barcode.BarcodeScanner
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
@@ -42,18 +40,17 @@ class BarcodeImageAnalyzer(zoomCallback: CameraFragment.ZoomCallback?, val conte
             barcodeScanner.process(image)
                 .addOnSuccessListener {
                     if (it.isNotEmpty()) {
-                        for (barcode in it) {
                             Toast.makeText(
                                 context,
-                                "Barcode Number: ${barcode.displayValue}",
+                                "Barcode Number: ${it[0].displayValue}",
                                 Toast.LENGTH_SHORT
                             ).show()
                             Log.d(
                                 BarcodeImageAnalyzer.TAG,
-                                "Barcode Number: ${barcode.displayValue}"
+                                "Barcode Number: ${it[0].displayValue}"
                             )
-                        }
-                        navController.navigate(R.id.action_navigation_camera_to_navigation_addremove)
+                        val action = CameraFragmentDirections.actionNavigationCameraToNavigationAddremove(it[0].displayValue!!)
+                        navController.navigate(action)
                     }
                 }
         }
