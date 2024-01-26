@@ -34,6 +34,7 @@
             app:destination="@id/navigation_camera" />
         <argument
             android:name="barcodeString"
+            android:defaultValue=""
             app:argType="string" />
     </fragment>
 </navigation>

@@ -11,9 +11,9 @@ class AddRemoveViewModel : ViewModel() {
     }
 
     private val _descriptionText = MutableLiveData<String>().apply {
-        value = ""
+        value = "test"
     }
 
     val barcodeText: LiveData<String> = _barcodeText
-    val descriptionText = _descriptionText
+    val descriptionText: LiveData<String> = _descriptionText
 }

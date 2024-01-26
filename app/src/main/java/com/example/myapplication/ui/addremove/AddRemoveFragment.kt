@@ -5,7 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
 import com.example.myapplication.databinding.FragmentAddremoveBinding
@@ -20,26 +22,31 @@ class AddRemoveFragment : Fragment() {
 
     private val args: AddRemoveFragmentArgs by navArgs()
 
+    private lateinit var addRemoveViewModel: AddRemoveViewModel
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val addRemoveViewModel =
-            ViewModelProvider(this).get(AddRemoveViewModel::class.java)
+        addRemoveViewModel =
+            ViewModelProvider(this)[AddRemoveViewModel::class.java]
 
         _binding = FragmentAddremoveBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
         val barcodeTextView: TextView = binding.barcodeText
         addRemoveViewModel.barcodeText.observe(viewLifecycleOwner){
-            barcodeTextView.text = args.barcodeString
+            barcodeTextView.text = it
         }
 
         val descriptionTextView: TextView = binding.descriptionText
-        addRemoveViewModel.descriptionText.observe(viewLifecycleOwner){
-            descriptionTextView.text = it
+
+        val descriptionObserver = Observer<String> {value ->
+            descriptionTextView.text = value
         }
+
+        addRemoveViewModel.descriptionText.observe(viewLifecycleOwner,descriptionObserver)
 
         binding.addButton.setOnClickListener {
             addButton()
@@ -53,11 +60,13 @@ class AddRemoveFragment : Fragment() {
     }
 
     private fun subButton() {
-        TODO("Not yet implemented")
+        Toast.makeText(requireContext(), "Sub Button: ${binding.descriptionText.text}",
+            Toast.LENGTH_SHORT).show()
     }
 
     private fun addButton() {
-        TODO("Not yet implemented")
+        Toast.makeText(requireContext(), "Add Button: ${binding.barcodeText.text}",
+            Toast.LENGTH_SHORT).show()
     }
 
     override fun onDestroyView() {
