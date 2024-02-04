@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
 import com.example.myapplication.databinding.FragmentAddremoveBinding
@@ -22,31 +21,29 @@ class AddRemoveFragment : Fragment() {
 
     private val args: AddRemoveFragmentArgs by navArgs()
 
-    private lateinit var addRemoveViewModel: AddRemoveViewModel
+    private lateinit var viewModel: AddRemoveViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        addRemoveViewModel =
-            ViewModelProvider(this)[AddRemoveViewModel::class.java]
-
         _binding = FragmentAddremoveBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
+        viewModel =
+            ViewModelProvider(this)[AddRemoveViewModel::class.java]
+        viewModel.barcodeText.value = args.barcodeString
+
         val barcodeTextView: TextView = binding.barcodeText
-        addRemoveViewModel.barcodeText.observe(viewLifecycleOwner){
+        viewModel.barcodeText.observe(viewLifecycleOwner){
             barcodeTextView.text = it
         }
 
         val descriptionTextView: TextView = binding.descriptionText
-
-        val descriptionObserver = Observer<String> {value ->
-            descriptionTextView.text = value
+        viewModel.barcodeText.observe(viewLifecycleOwner){
+            barcodeTextView.text = it
         }
-
-        addRemoveViewModel.descriptionText.observe(viewLifecycleOwner,descriptionObserver)
 
         binding.addButton.setOnClickListener {
             addButton()
