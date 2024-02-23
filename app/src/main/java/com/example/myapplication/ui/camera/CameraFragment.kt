@@ -2,7 +2,6 @@ package com.example.myapplication.ui.camera
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import androidx.camera.core.ImageCapture
 import androidx.core.content.ContextCompat
@@ -26,17 +25,11 @@ import com.example.myapplication.databinding.FragmentCameraBinding
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.mlkit.vision.barcode.ZoomSuggestionOptions
 import kotlinx.coroutines.launch
-import com.example.myapplication.BarcodeImageAnalyzer
-import com.example.myapplication.R
+import com.example.myapplication.imageAnalysis.BarcodeImageAnalyzer
 
 class CameraFragment : Fragment() {
     private lateinit var viewBinding: FragmentCameraBinding
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
-    private val binding get() = viewBinding
-
-    private var imageCapture: ImageCapture? = null
     private var camera: Camera? = null
 
     private lateinit var cameraExecutor: ExecutorService
@@ -90,7 +83,8 @@ class CameraFragment : Fragment() {
                 .build()
                 .also {
                     it.setAnalyzer(cameraExecutor, BarcodeImageAnalyzer(ZoomCallback(camera),
-                        requireContext(), requireView().findNavController()))
+                        requireContext(), requireView().findNavController())
+                    )
                 }
 
             // Select back camera as a default
@@ -115,10 +109,6 @@ class CameraFragment : Fragment() {
         }, ContextCompat.getMainExecutor(requireContext()))
     }
 
-    private fun takePhoto() {
-
-    }
-
     private fun requestPermissions() {
         activityResultLauncher.launch(REQUIRED_PERMISSIONS)
     }
@@ -138,11 +128,7 @@ class CameraFragment : Fragment() {
         private val REQUIRED_PERMISSIONS =
             mutableListOf (
                 Manifest.permission.CAMERA
-            ).apply {
-                if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-                    add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                }
-            }.toTypedArray()
+            ).toTypedArray()
     }
 
     private val activityResultLauncher =

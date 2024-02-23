@@ -41,8 +41,8 @@ class AddRemoveFragment : Fragment() {
         }
 
         val descriptionTextView: TextView = binding.descriptionText
-        viewModel.barcodeText.observe(viewLifecycleOwner){
-            barcodeTextView.text = it
+        viewModel.descriptionText.observe(viewLifecycleOwner){
+            descriptionTextView.text = it
         }
 
         binding.addButton.setOnClickListener {
@@ -57,13 +57,23 @@ class AddRemoveFragment : Fragment() {
     }
 
     private fun subButton() {
-        Toast.makeText(requireContext(), "Sub Button: ${binding.descriptionText.text}",
+        Toast.makeText(requireContext(), "Sub Button: ${viewModel.descriptionText.value}",
             Toast.LENGTH_SHORT).show()
     }
 
     private fun addButton() {
-        Toast.makeText(requireContext(), "Add Button: ${binding.barcodeText.text}",
+        viewModel.barcodeText.value = binding.barcodeText.text.toString()
+        viewModel.descriptionText.value = binding.descriptionText.text.toString()
+
+        Toast.makeText(requireContext(), "Add Button: ${viewModel.barcodeText.value}",
             Toast.LENGTH_SHORT).show()
+        Toast.makeText(requireContext(), "Add Button: ${viewModel.descriptionText.value}",
+            Toast.LENGTH_SHORT).show()
+        Toast.makeText(requireContext(), "Clearing Field",
+            Toast.LENGTH_SHORT).show()
+
+        viewModel.barcodeText.value = ""
+        viewModel.descriptionText.value = ""
     }
 
     override fun onDestroyView() {

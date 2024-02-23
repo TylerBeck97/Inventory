@@ -1,13 +1,15 @@
 package com.example.myapplication.ui.inventory
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.myapplication.network.InventoryAPI
+import kotlinx.coroutines.launch
 
 class InventoryViewModel : ViewModel() {
 
-    private val _text = MutableLiveData<String>().apply {
-        value = "This is dashboard Fragment"
+    private fun getItems() {
+        viewModelScope.launch {
+            val listResult = InventoryAPI.retrofitService.getItems()
+        }
     }
-    val text: LiveData<String> = _text
 }

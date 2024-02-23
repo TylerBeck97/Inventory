@@ -1,4 +1,4 @@
-package com.example.myapplication
+package com.example.myapplication.imageAnalysis
 
 import android.content.Context
 import android.util.Log
@@ -46,7 +46,7 @@ class BarcodeImageAnalyzer(zoomCallback: CameraFragment.ZoomCallback?, val conte
                                 Toast.LENGTH_SHORT
                             ).show()
                             Log.d(
-                                BarcodeImageAnalyzer.TAG,
+                                TAG,
                                 "Barcode Number: ${it[0].displayValue}"
                             )
                         val action = CameraFragmentDirections.actionNavigationCameraToNavigationAddremove(it[0].displayValue!!)
