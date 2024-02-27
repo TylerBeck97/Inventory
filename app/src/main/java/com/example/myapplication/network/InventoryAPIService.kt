@@ -9,7 +9,7 @@ import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 
-private const val BASE_URL = "http://127.0.0.1:8080"
+private const val BASE_URL = "http://10.0.2.2:8080"
 
 private val retrofit = Retrofit.Builder()
     .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))

@@ -3,7 +3,6 @@ package com.example.myapplication.ui.camera
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
-import androidx.camera.core.ImageCapture
 import androidx.core.content.ContextCompat
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
