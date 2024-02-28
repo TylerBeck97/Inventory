@@ -13,7 +13,6 @@ import com.example.myapplication.model.InventoryItem
 import com.example.myapplication.network.InventoryAPI
 import kotlinx.coroutines.launch
 import java.io.IOException
-import java.lang.Error
 
 sealed interface InventoryUIState {
     data class Success(val items: List<InventoryItem>) : InventoryUIState
@@ -23,7 +22,6 @@ sealed interface InventoryUIState {
     object Loading : InventoryUIState
 }
 
-@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 class InventoryViewModel : ViewModel() {
 
     var inventoryUIState: InventoryUIState by mutableStateOf(InventoryUIState.Loading)
@@ -34,7 +32,7 @@ class InventoryViewModel : ViewModel() {
     init {
         getItems()
     }
-    @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
+
     fun getItems() {
         viewModelScope.launch {
             Log.d(TAG, "getItems: Trying to get items from server")
@@ -43,7 +41,6 @@ class InventoryViewModel : ViewModel() {
                 val listResult = InventoryAPI.retrofitService.getItems()
                 Log.d(TAG, "getItems: Success getting items from server")
                 InventoryUIState.Success(listResult)
-
             }
             catch (e: IOException){
                 Log.d(TAG, "getItems: Something went wrong IOException")

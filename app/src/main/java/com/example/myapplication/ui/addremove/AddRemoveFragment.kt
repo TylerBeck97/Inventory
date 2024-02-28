@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
 import com.example.myapplication.databinding.FragmentAddremoveBinding
+import com.example.myapplication.model.InventoryItem
 
 class AddRemoveFragment : Fragment() {
 
@@ -65,12 +66,19 @@ class AddRemoveFragment : Fragment() {
         viewModel.barcodeText.value = binding.barcodeText.text.toString()
         viewModel.descriptionText.value = binding.descriptionText.text.toString()
 
-        Toast.makeText(requireContext(), "Add Button: ${viewModel.barcodeText.value}",
-            Toast.LENGTH_SHORT).show()
-        Toast.makeText(requireContext(), "Add Button: ${viewModel.descriptionText.value}",
-            Toast.LENGTH_SHORT).show()
-        Toast.makeText(requireContext(), "Clearing Field",
-            Toast.LENGTH_SHORT).show()
+        viewModel.addItem(InventoryItem(null,
+            viewModel.barcodeText.value!!,
+            viewModel.descriptionText.value!!,
+            1)) {
+            var toastString = ""
+            toastString = if (it?.id != null){
+                "Item added!"
+            } else {
+                "Error adding item!"
+            }
+
+            Toast.makeText(requireContext(), toastString, Toast.LENGTH_SHORT).show()
+        }
 
         viewModel.barcodeText.value = ""
         viewModel.descriptionText.value = ""
