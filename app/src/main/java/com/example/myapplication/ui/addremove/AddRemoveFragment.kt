@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
 import com.example.myapplication.databinding.FragmentAddremoveBinding
@@ -22,7 +23,7 @@ class AddRemoveFragment : Fragment() {
 
     private val args: AddRemoveFragmentArgs by navArgs()
 
-    private lateinit var viewModel: AddRemoveViewModel
+    private val viewModel: AddRemoveViewModel by viewModels {AddRemoveViewModel.Factory}
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -32,8 +33,6 @@ class AddRemoveFragment : Fragment() {
         _binding = FragmentAddremoveBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        viewModel =
-            ViewModelProvider(this)[AddRemoveViewModel::class.java]
         viewModel.barcodeText.value = args.barcodeString
 
         val barcodeTextView: TextView = binding.barcodeText
@@ -47,34 +46,28 @@ class AddRemoveFragment : Fragment() {
         }
 
         binding.addButton.setOnClickListener {
-            addButton()
+            changeQuantityButton(1)
         }
 
         binding.subtractButton.setOnClickListener {
-            subButton()
+            changeQuantityButton(-1)
         }
 
         return root
     }
 
-    private fun subButton() {
-        Toast.makeText(requireContext(), "Sub Button: ${viewModel.descriptionText.value}",
-            Toast.LENGTH_SHORT).show()
-    }
-
-    private fun addButton() {
+    private fun changeQuantityButton(quantity: Int) {
         viewModel.barcodeText.value = binding.barcodeText.text.toString()
         viewModel.descriptionText.value = binding.descriptionText.text.toString()
 
         viewModel.addItem(InventoryItem(null,
             viewModel.barcodeText.value!!,
             viewModel.descriptionText.value!!,
-            1)) {
-            var toastString = ""
-            toastString = if (it?.id != null){
-                "Item added!"
+            quantity)) {
+            val toastString = if (it?.id != null){
+                if(quantity > 0) "Item added!" else "Item removed!"
             } else {
-                "Error adding item!"
+                if(quantity > 0) "Error adding item!" else "Error removing item"
             }
 
             Toast.makeText(requireContext(), toastString, Toast.LENGTH_SHORT).show()

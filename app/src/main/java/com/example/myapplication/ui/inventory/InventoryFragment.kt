@@ -13,20 +13,19 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.compose.material3.Text
+import androidx.fragment.app.viewModels
 import com.example.myapplication.model.InventoryItem
 
 
 class InventoryFragment : Fragment() {
 
-    private lateinit var viewModel: InventoryViewModel
+    private val viewModel: InventoryViewModel by viewModels {InventoryViewModel.Factory}
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewModel = ViewModelProvider(this)[InventoryViewModel::class.java]
-
         return ComposeView(requireContext()).apply {
             setContent {
                 when (viewModel.inventoryUIState){

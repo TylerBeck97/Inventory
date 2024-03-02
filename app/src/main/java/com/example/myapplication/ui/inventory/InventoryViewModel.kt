@@ -1,16 +1,19 @@
 package com.example.myapplication.ui.inventory
 
 import android.net.http.HttpException
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresExtension
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.myapplication.InventoryApplication
+import com.example.myapplication.data.InventoryItemRepository
 import com.example.myapplication.model.InventoryItem
-import com.example.myapplication.network.InventoryAPI
 import kotlinx.coroutines.launch
 import java.io.IOException
 
@@ -22,7 +25,7 @@ sealed interface InventoryUIState {
     object Loading : InventoryUIState
 }
 
-class InventoryViewModel : ViewModel() {
+class InventoryViewModel(private val inventoryItemRepository: InventoryItemRepository) : ViewModel() {
 
     var inventoryUIState: InventoryUIState by mutableStateOf(InventoryUIState.Loading)
         private set
@@ -38,7 +41,7 @@ class InventoryViewModel : ViewModel() {
             Log.d(TAG, "getItems: Trying to get items from server")
             inventoryUIState = InventoryUIState.Loading
             inventoryUIState = try {
-                val listResult = InventoryAPI.retrofitService.getItems()
+                val listResult = inventoryItemRepository.getInventoryItems()
                 Log.d(TAG, "getItems: Success getting items from server")
                 InventoryUIState.Success(listResult)
             }
@@ -49,6 +52,16 @@ class InventoryViewModel : ViewModel() {
             catch (e: HttpException){
                 Log.d(TAG, "getItems: Something went wrong HttpException")
                 InventoryUIState.Error(e)
+            }
+        }
+    }
+
+    companion object {
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val application = (this[APPLICATION_KEY] as InventoryApplication)
+                val inventoryItemRepository = application.container.inventoryItemRepository
+                InventoryViewModel(inventoryItemRepository = inventoryItemRepository)
             }
         }
     }
