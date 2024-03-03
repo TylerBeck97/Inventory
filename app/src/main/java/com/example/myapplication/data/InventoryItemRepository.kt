@@ -10,6 +10,10 @@ interface InventoryItemRepository {
     suspend fun getInventoryItems(): List<InventoryItem>
 
     fun addInventoryItem(item: InventoryItem, onResult: (InventoryItem?) -> Unit)
+
+    fun deleteItem(barcode: String, onResult: (InventoryItem?) -> Unit)
+
+    fun modifyItem(barcode: String, item: InventoryItem, onResult: (InventoryItem?) -> Unit)
 }
 
 class NetworkInventoryItemRepository(
@@ -30,6 +34,35 @@ class NetworkInventoryItemRepository(
                 val addedItem = response.body()
                 onResult(addedItem)
             }
+        })
+    }
+
+    override fun deleteItem(barcode: String, onResult: (InventoryItem?) -> Unit){
+        return inventoryApiService.deleteItem(barcode).enqueue(
+            object : Callback<InventoryItem> {
+                override fun onFailure(call: Call<InventoryItem>, t: Throwable) {
+                    onResult(null)
+                }
+
+                override fun onResponse(call: Call<InventoryItem>, response: Response<InventoryItem>
+                ) {
+                    val addedItem = response.body()
+                    onResult(addedItem)
+                }
+        })
+    }
+
+    override fun modifyItem(barcode: String, item: InventoryItem, onResult: (InventoryItem?) -> Unit) {
+        return inventoryApiService.modifyItem(barcode, item).enqueue(object : Callback<InventoryItem> {
+                override fun onFailure(call: Call<InventoryItem>, t: Throwable) {
+                    onResult(null)
+                }
+
+                override fun onResponse(call: Call<InventoryItem>, response: Response<InventoryItem>
+                ) {
+                    val addedItem = response.body()
+                    onResult(addedItem)
+                }
         })
     }
 

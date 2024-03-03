@@ -56,6 +56,14 @@ class InventoryViewModel(private val inventoryItemRepository: InventoryItemRepos
         }
     }
 
+    fun deleteItem(barcode: String, onResult: (InventoryItem?) -> Unit){
+        inventoryItemRepository.deleteItem(barcode, onResult)
+    }
+
+    fun modifyItem(barcode: String, item: InventoryItem, onResult: (InventoryItem?) -> Unit){
+        inventoryItemRepository.modifyItem(barcode, item, onResult)
+    }
+
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
