@@ -7,7 +7,9 @@ import retrofit2.Callback
 import retrofit2.Response
 
 interface InventoryItemRepository {
-    suspend fun getInventoryItems(): List<InventoryItem>
+    suspend fun getItems(): List<InventoryItem>
+
+    suspend fun getItem(barcode: String): InventoryItem
 
     fun addInventoryItem(item: InventoryItem, onResult: (InventoryItem?) -> Unit)
 
@@ -19,8 +21,12 @@ interface InventoryItemRepository {
 class NetworkInventoryItemRepository(
     private val inventoryApiService: InventoryAPIService
 ): InventoryItemRepository{
-    override suspend fun getInventoryItems(): List<InventoryItem> {
+    override suspend fun getItems(): List<InventoryItem> {
         return inventoryApiService.getItems()
+    }
+
+    override suspend fun getItem(barcode: String): InventoryItem {
+        return inventoryApiService.getItem(barcode)
     }
 
     override fun addInventoryItem(item: InventoryItem, onResult: (InventoryItem?) -> Unit) {

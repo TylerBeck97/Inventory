@@ -41,7 +41,7 @@ class InventoryViewModel(private val inventoryItemRepository: InventoryItemRepos
             Log.d(TAG, "getItems: Trying to get items from server")
             inventoryUIState = InventoryUIState.Loading
             inventoryUIState = try {
-                val listResult = inventoryItemRepository.getInventoryItems()
+                val listResult = inventoryItemRepository.getItems()
                 Log.d(TAG, "getItems: Success getting items from server")
                 InventoryUIState.Success(listResult)
             }

@@ -32,7 +32,10 @@ class AddRemoveFragment : Fragment() {
         _binding = FragmentAddremoveBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        viewModel.barcodeText.value = args.barcodeString
+        if (args.barcodeString != "") {
+            viewModel.barcodeText.value = args.barcodeString
+            viewModel.getItem(args.barcodeString)
+        }
 
         val barcodeTextView: TextView = binding.barcodeText
         viewModel.barcodeText.observe(viewLifecycleOwner){

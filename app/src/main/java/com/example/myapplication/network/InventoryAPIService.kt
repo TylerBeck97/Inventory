@@ -6,13 +6,15 @@ import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.Call
-import retrofit2.Response
 import retrofit2.http.PUT
 import retrofit2.http.Path
 
 interface InventoryAPIService {
     @GET("items")
     suspend fun getItems(): List<InventoryItem>
+
+    @GET("items/{barcode}")
+    suspend fun getItem(@Path("barcode") barcode: String): InventoryItem
 
     @POST("items")
     fun addItem(@Body item: InventoryItem): Call<InventoryItem>

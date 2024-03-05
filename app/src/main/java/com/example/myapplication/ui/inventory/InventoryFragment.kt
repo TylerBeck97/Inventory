@@ -10,19 +10,20 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.viewModels
+import com.example.compose.AppTheme
 import com.example.myapplication.model.InventoryItem
 
 
@@ -37,10 +38,12 @@ class InventoryFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                when (viewModel.inventoryUIState){
-                    is InventoryUIState.Loading -> LoadingScreen()
-                    is InventoryUIState.Success -> ResultScreen((viewModel.inventoryUIState as InventoryUIState.Success).items)
-                    is InventoryUIState.Error -> ErrorScreen()
+                AppTheme {
+                    when (viewModel.inventoryUIState) {
+                        is InventoryUIState.Loading -> LoadingScreen()
+                        is InventoryUIState.Success -> ResultScreen((viewModel.inventoryUIState as InventoryUIState.Success).items)
+                        is InventoryUIState.Error -> ErrorScreen()
+                    }
                 }
             }
         }
@@ -54,7 +57,8 @@ class InventoryFragment : Fragment() {
 
     @Composable
     fun ErrorScreen(){
-        Text("Error: ${(viewModel.inventoryUIState as InventoryUIState.Error).error}")
+        Text(text= "Error: ${(viewModel.inventoryUIState as InventoryUIState.Error).error}",
+            color= MaterialTheme.colorScheme.error)
     }
     @Composable
     fun LoadingScreen(){
@@ -67,9 +71,9 @@ class InventoryFragment : Fragment() {
             items(items) {item ->
                 Row {
                     Column (modifier = Modifier.fillMaxWidth(0.5f)){
-                        Text("Barcode: ${item.barcode}")
-                        Text(item.description)
-                        Text("Quantity: ${item.quantity}")
+                        Text(text= "Barcode: ${item.barcode}", color= MaterialTheme.colorScheme.onSurface)
+                        Text(text= item.description, color= MaterialTheme.colorScheme.onSurface)
+                        Text(text= "Quantity: ${item.quantity}", color= MaterialTheme.colorScheme.onSurface)
                     }
 
                     QuantityButtons(true, item)
@@ -112,7 +116,9 @@ class InventoryFragment : Fragment() {
                 Toast.makeText(requireContext(), toastString, Toast.LENGTH_SHORT).show()
                 viewModel.getItems()
             }
-        }) {
+        },
+            colors= ButtonColors(containerColor = Color.Red, contentColor = Color.White,
+                disabledContainerColor = Color.Gray, disabledContentColor = Color.Gray) ) {
             Text("X")
         }
     }
